@@ -35,8 +35,23 @@ export function Post({ author, publishedAt, content }) {
     }
 
     function handleNewCommentChange() {
-        setNewCommentText(event.target.value)
+        event.target.setCustomValidity('');
+        setNewCommentText(event.target.value);
     }
+
+    function handleNewCommentInvalid() {
+        event.target.setCustomValidity('Este campo é obrigatório!')
+    }
+
+    function deleteComment(commentToDelete) {
+        const commentsWithoudtDeletedOne = comments.filter(comment => {
+            return comment != commentToDelete;
+        })
+
+        setComments(commentsWithoudtDeletedOne);
+    }
+
+    const isNewCommentEmpty = newCommentText.length === 0;
 
     return (
         <article className={styles.post}>
@@ -60,9 +75,9 @@ export function Post({ author, publishedAt, content }) {
             <div className={styles.content}>
                 {content.map(line => {
                     if(line.type === 'paragraph') {
-                        return <p>{line.content}</p>;
+                        return <p key={line.content}>{line.content}</p>;
                     }else if(line.type === 'link') {
-                        return <p><a href='"#'>{line.content}</a></p>
+                        return <p key={line.content}><a href='"#'>{line.content}</a></p>
                     }
                 })}
             </div>
@@ -75,17 +90,29 @@ export function Post({ author, publishedAt, content }) {
                     placeholder='Deixe um comentário'
                     value={newCommentText}
                     onChange={handleNewCommentChange}
+                    onInvalid={handleNewCommentInvalid}
+                    required
                 />
 
                 <footer>
-                    <button type='submit'>Comentar</button>
+                    <button 
+                        type='submit' 
+                        disabled={isNewCommentEmpty}>
+                        Comentar
+                    </button>
                 </footer>
 
             </form>
 
             <div className={styles.commentList}>
                 {comments.map(comment => {
-                    return <Comment content={comment}/>
+                    return (
+                        <Comment 
+                            key={comment} 
+                            content={comment} 
+                            onDeleteComment={deleteComment}
+                        />
+                    )
                 })}
             </div>
         </article>
